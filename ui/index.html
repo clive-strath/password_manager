@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Keychain</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10V7a5 5 0 0 1 10 0v3M5 10h14v11H5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+      <span>Keychain</span>
+    </div>
+    <button id="lock-btn" class="ghost" hidden>Lock</button>
+  </header>
+
+  <main>
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+    <!-- Loading -->
+    <section id="view-loading" class="panel narrow">
+      <p class="muted">Connecting…</p>
+    </section>
+
+    <!-- First run: create a vault -->
+    <section id="view-setup" class="panel narrow" hidden>
+      <h1>Create your vault</h1>
+      <p class="muted">Choose a master password. It's never stored. If you forget it, the vault can't be opened.</p>
+      <form id="setup-form" autocomplete="off">
+        <label>Master password
+          <input type="password" id="setup-password" required autocomplete="new-password">
+        </label>
+        <label>Confirm master password
+          <input type="password" id="setup-confirm" required autocomplete="new-password">
+        </label>
+        <button type="submit" class="primary">Create vault</button>
+      </form>
+    </section>
+
+    <!-- Unlock existing vault -->
+    <section id="view-unlock" class="panel narrow" hidden>
+      <h1>Unlock vault</h1>
+      <p class="muted">Enter your master password.</p>
+      <form id="unlock-form" autocomplete="off">
+        <label>Master password
+          <input type="password" id="unlock-password" required autocomplete="current-password">
+        </label>
+        <button type="submit" class="primary">Unlock</button>
+      </form>
+    </section>
+
+    <!-- Unlocked vault -->
+    <section id="view-vault" hidden>
+      <div class="panel list-panel">
+        <div class="list-head">
+          <h2>Saved domains <span id="domain-count" class="count"></span></h2>
+          <input type="search" id="domain-filter" placeholder="Filter" spellcheck="false" aria-label="Filter domains">
+        </div>
+        <ul id="domain-list" class="domain-list"></ul>
+        <p id="domain-list-empty" class="muted" hidden></p>
+      </div>
+
+      <div class="grid">
+        <div class="panel">
+          <h2>Look up a password</h2>
+          <form id="lookup-form" autocomplete="off">
+            <label>Domain
+              <input type="text" id="lookup-domain" placeholder="www.example.com" required spellcheck="false">
+            </label>
+            <button type="submit" class="primary">Find</button>
+          </form>
+
+          <div id="lookup-result" class="result" hidden>
+            <div class="result-head">
+              <span id="result-domain" class="domain"></span>
+            </div>
+            <div class="secret-row">
+              <code id="result-password" class="secret"></code>
+              <button type="button" id="result-toggle" class="ghost small">Show</button>
+              <button type="button" id="result-copy" class="ghost small">Copy</button>
+            </div>
+            <div class="result-actions">
+              <button type="button" id="result-edit" class="ghost small">Change password</button>
+              <button type="button" id="result-delete" class="danger small">Delete</button>
+            </div>
+          </div>
+          <p id="lookup-empty" class="muted" hidden></p>
+        </div>
+
+        <div class="panel">
+          <h2>Save a password</h2>
+          <form id="save-form" autocomplete="off">
+            <label>Domain
+              <input type="text" id="save-domain" placeholder="www.example.com" required spellcheck="false">
+            </label>
+            <label>Password
+              <div class="input-row">
+                <input type="password" id="save-password" required maxlength="64" autocomplete="new-password">
+                <button type="button" id="save-toggle" class="ghost small">Show</button>
+                <button type="button" id="save-generate" class="ghost small">Generate</button>
+              </div>
+            </label>
+            <p class="hint">Up to 64 characters. Saving an existing domain replaces its password.</p>
+            <button type="submit" class="primary">Save</button>
+          </form>
+        </div>
+      </div>
+
+      <p class="footnote">
+        Domain names are never stored in the clear. The list above is kept as encrypted entries inside the vault.
+        Passwords saved before the list existed appear here after you look them up once.
+        Changes are saved to disk automatically, and the vault locks after 10 minutes idle.
+      </p>
+    </section>
+  </main>
+</body>
+</html>

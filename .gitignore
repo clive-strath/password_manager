@@ -1,0 +1,20 @@
+# Vault data: encrypted passwords and the trusted checksum
+vault-data/
+*.tmp
+
+# Environment and secret files
+.env
+.env.*
+*.pem
+*.key
+
+# Dependencies (reinstall with `npm install`)
+node_modules/
+
+# Logs and OS/editor files
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
