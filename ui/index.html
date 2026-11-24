@@ -8,112 +8,222 @@
   <script src="/app.js" defer></script>
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10V7a5 5 0 0 1 10 0v3M5 10h14v11H5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
-      <span>Keychain</span>
-    </div>
-    <button id="lock-btn" class="ghost" hidden>Lock</button>
-  </header>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
-  <main>
-    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <!-- ============ Locked: create / unlock ============ -->
+  <section id="view-auth" class="auth">
+    <div class="auth-card">
+      <div class="auth-brand">
+        <span class="mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M7 10V7a5 5 0 0 1 10 0v3M5 10h14v11H5zM12 14v3"/></svg>
+        </span>
+        <span>Keychain</span>
+      </div>
 
-    <!-- Loading -->
-    <section id="view-loading" class="panel narrow">
-      <p class="muted">Connecting…</p>
-    </section>
+      <p id="auth-loading" class="muted">Connecting…</p>
 
-    <!-- First run: create a vault -->
-    <section id="view-setup" class="panel narrow" hidden>
-      <h1>Create your vault</h1>
-      <p class="muted">Choose a master password. It's never stored. If you forget it, the vault can't be opened.</p>
-      <form id="setup-form" autocomplete="off">
+      <form id="setup-form" autocomplete="off" hidden>
+        <h1>Create your vault</h1>
+        <p class="muted">Choose a master password. It's never stored, so if you forget it the vault can't be opened.</p>
         <label>Master password
           <input type="password" id="setup-password" required autocomplete="new-password">
         </label>
         <label>Confirm master password
           <input type="password" id="setup-confirm" required autocomplete="new-password">
         </label>
-        <button type="submit" class="primary">Create vault</button>
+        <button type="submit" class="primary wide">Create vault</button>
       </form>
-    </section>
 
-    <!-- Unlock existing vault -->
-    <section id="view-unlock" class="panel narrow" hidden>
-      <h1>Unlock vault</h1>
-      <p class="muted">Enter your master password.</p>
-      <form id="unlock-form" autocomplete="off">
+      <form id="unlock-form" autocomplete="off" hidden>
+        <h1>Welcome back</h1>
+        <p class="muted">Enter your master password to unlock your vault.</p>
         <label>Master password
           <input type="password" id="unlock-password" required autocomplete="current-password">
         </label>
-        <button type="submit" class="primary">Unlock</button>
+        <button type="submit" class="primary wide">Unlock</button>
       </form>
-    </section>
+    </div>
+    <p class="auth-foot">Your vault is encrypted on this computer. Nothing is sent anywhere else.</p>
+  </section>
 
-    <!-- Unlocked vault -->
-    <section id="view-vault" hidden>
-      <div class="panel list-panel">
-        <div class="list-head">
-          <h2>Saved domains <span id="domain-count" class="count"></span></h2>
-          <input type="search" id="domain-filter" placeholder="Filter" spellcheck="false" aria-label="Filter domains">
-        </div>
-        <ul id="domain-list" class="domain-list"></ul>
-        <p id="domain-list-empty" class="muted" hidden></p>
+  <!-- ============ Unlocked vault ============ -->
+  <div id="view-vault" class="app" hidden>
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M7 10V7a5 5 0 0 1 10 0v3M5 10h14v11H5zM12 14v3"/></svg>
+        </span>
+        <span class="brand-name">Keychain</span>
       </div>
 
-      <div class="grid">
-        <div class="panel">
-          <h2>Look up a password</h2>
-          <form id="lookup-form" autocomplete="off">
-            <label>Domain
-              <input type="text" id="lookup-domain" placeholder="www.example.com" required spellcheck="false">
-            </label>
-            <button type="submit" class="primary">Find</button>
-          </form>
+      <nav class="nav">
+        <button type="button" class="nav-item active" id="nav-all">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></svg>
+          <span class="nav-label">All items</span>
+          <span class="nav-count" id="nav-count"></span>
+        </button>
+        <button type="button" class="nav-item" id="nav-generator">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.9-4M4 4v4h4M4 13a8 8 0 0 0 14.9 4M20 20v-4h-4"/></svg>
+          <span class="nav-label">Password generator</span>
+        </button>
+      </nav>
 
-          <div id="lookup-result" class="result" hidden>
-            <div class="result-head">
-              <span id="result-domain" class="domain"></span>
-            </div>
-            <div class="secret-row">
-              <code id="result-password" class="secret"></code>
-              <button type="button" id="result-toggle" class="ghost small">Show</button>
-              <button type="button" id="result-copy" class="ghost small">Copy</button>
-            </div>
-            <div class="result-actions">
-              <button type="button" id="result-edit" class="ghost small">Change password</button>
-              <button type="button" id="result-delete" class="danger small">Delete</button>
-            </div>
+      <div class="sidebar-foot">
+        <button type="button" class="nav-item" id="lock-btn">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10V7a5 5 0 0 1 10 0v3M5 10h14v11H5z"/></svg>
+          <span class="nav-label">Lock vault</span>
+        </button>
+        <p class="sidebar-note">Locks automatically after 10&nbsp;minutes idle.</p>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="main-head">
+        <div class="search">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4"/></svg>
+          <input type="search" id="search" placeholder="Search vault" spellcheck="false" aria-label="Search vault">
+          <kbd>/</kbd>
+        </div>
+        <button type="button" class="primary add-btn" id="add-btn">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          <span>Add item</span>
+        </button>
+      </header>
+
+      <div class="content">
+        <div class="content-head">
+          <h1>All items <span class="count" id="item-count"></span></h1>
+          <div class="view-toggle" role="group" aria-label="Layout">
+            <button type="button" id="view-grid" aria-label="Grid view" aria-pressed="true">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></svg>
+            </button>
+            <button type="button" id="view-list" aria-label="List view" aria-pressed="false">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
           </div>
-          <p id="lookup-empty" class="muted" hidden></p>
         </div>
 
-        <div class="panel">
-          <h2>Save a password</h2>
-          <form id="save-form" autocomplete="off">
-            <label>Domain
-              <input type="text" id="save-domain" placeholder="www.example.com" required spellcheck="false">
-            </label>
-            <label>Password
-              <div class="input-row">
-                <input type="password" id="save-password" required maxlength="64" autocomplete="new-password">
-                <button type="button" id="save-toggle" class="ghost small">Show</button>
-                <button type="button" id="save-generate" class="ghost small">Generate</button>
-              </div>
-            </label>
-            <p class="hint">Up to 64 characters. Saving an existing domain replaces its password.</p>
-            <button type="submit" class="primary">Save</button>
-          </form>
+        <ul id="items" class="items grid"></ul>
+
+        <div id="empty" class="empty" hidden>
+          <div class="empty-art" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M7 10V7a5 5 0 0 1 10 0v3M5 10h14v11H5zM12 14v3"/></svg>
+          </div>
+          <h2 id="empty-title"></h2>
+          <p id="empty-text" class="muted"></p>
+          <div class="empty-actions">
+            <button type="button" class="ghost" id="empty-lookup" hidden></button>
+            <button type="button" class="primary" id="empty-add">Add a password</button>
+          </div>
+        </div>
+
+        <p class="footnote">
+          Site names are never stored in the clear: the list is kept as encrypted entries inside the vault.
+          Passwords saved before the list existed show up here after you look them up once (type the exact site in search).
+          Logos are bundled locally, so no site names leave this computer.
+        </p>
+      </div>
+    </div>
+
+    <button type="button" class="fab" id="fab" aria-label="Add item">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+    </button>
+  </div>
+
+  <!-- ============ Item details ============ -->
+  <dialog id="detail-dialog" class="sheet" aria-labelledby="detail-name">
+    <div class="sheet-inner">
+      <div class="hero" id="detail-hero">
+        <button type="button" class="icon-btn hero-close" id="detail-x" aria-label="Close">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+      <div class="sheet-body">
+        <h2 id="detail-name" class="sheet-title"></h2>
+        <p id="detail-domain" class="muted sheet-sub"></p>
+
+        <div class="field">
+          <span class="field-label">Password</span>
+          <div class="secret-row">
+            <code id="detail-password" class="secret"></code>
+            <button type="button" class="icon-btn" id="detail-toggle" aria-label="Show password"></button>
+            <button type="button" class="icon-btn" id="detail-copy" aria-label="Copy password"></button>
+          </div>
         </div>
       </div>
+      <footer class="sheet-foot">
+        <button type="button" class="danger" id="detail-delete">Delete</button>
+        <span class="spacer"></span>
+        <button type="button" class="ghost" id="detail-close">Close</button>
+        <button type="button" class="primary" id="detail-edit">Edit</button>
+      </footer>
+    </div>
+  </dialog>
 
-      <p class="footnote">
-        Domain names are never stored in the clear. The list above is kept as encrypted entries inside the vault.
-        Passwords saved before the list existed appear here after you look them up once.
-        Changes are saved to disk automatically, and the vault locks after 10 minutes idle.
-      </p>
-    </section>
-  </main>
+  <!-- ============ Add / edit item ============ -->
+  <dialog id="item-dialog" class="sheet" aria-labelledby="item-title">
+    <form id="item-form" class="sheet-inner" autocomplete="off">
+      <header class="sheet-head">
+        <div id="item-logo"></div>
+        <div>
+          <h2 id="item-title" class="sheet-title">Add password</h2>
+          <p id="item-sub" class="muted sheet-sub">Popular sites get their logo automatically.</p>
+        </div>
+      </header>
+      <div class="sheet-body">
+        <label>Website
+          <input type="text" id="item-domain" placeholder="spotify.com" required spellcheck="false" maxlength="64">
+        </label>
+        <label>Password
+          <div class="input-row">
+            <input type="password" id="item-password" required maxlength="64" autocomplete="new-password">
+            <button type="button" class="icon-btn" id="item-toggle" aria-label="Show password"></button>
+            <button type="button" class="icon-btn" id="item-generate" aria-label="Generate password" title="Generate password"></button>
+          </div>
+        </label>
+        <div class="strength" id="item-strength">
+          <div class="strength-bar"><span id="strength-fill"></span></div>
+          <span id="strength-label" class="strength-label"></span>
+          <button type="button" class="link" id="item-gen-options">Generator options</button>
+        </div>
+        <p class="hint">Up to 64 characters. Saving a site that's already in the vault replaces its password.</p>
+      </div>
+      <footer class="sheet-foot">
+        <span class="spacer"></span>
+        <button type="button" class="ghost" id="item-cancel">Cancel</button>
+        <button type="submit" class="primary">Save</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <!-- ============ Password generator ============ -->
+  <dialog id="gen-dialog" class="sheet small-sheet" aria-labelledby="gen-title">
+    <div class="sheet-inner">
+      <header class="sheet-head plain">
+        <h2 id="gen-title" class="sheet-title">Password generator</h2>
+      </header>
+      <div class="sheet-body">
+        <div class="gen-output">
+          <code id="gen-password" class="secret"></code>
+          <button type="button" class="icon-btn" id="gen-refresh" aria-label="Generate another"></button>
+          <button type="button" class="icon-btn" id="gen-copy" aria-label="Copy password"></button>
+        </div>
+        <label class="range-label">
+          <span>Length <output id="gen-length-out"></output></span>
+          <input type="range" id="gen-length" min="8" max="64" step="1">
+        </label>
+        <div class="checks">
+          <label class="check"><input type="checkbox" id="gen-upper"> A–Z</label>
+          <label class="check"><input type="checkbox" id="gen-digits"> 0–9</label>
+          <label class="check"><input type="checkbox" id="gen-symbols"> !@#$</label>
+        </div>
+      </div>
+      <footer class="sheet-foot">
+        <span class="spacer"></span>
+        <button type="button" class="ghost" id="gen-close">Close</button>
+        <button type="button" class="primary" id="gen-use">Use password</button>
+      </footer>
+    </div>
+  </dialog>
 </body>
 </html>

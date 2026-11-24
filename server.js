@@ -20,6 +20,7 @@ const http = require("http");
 const fs = require("fs");
 const path = require("path");
 const { Keychain } = require("./password-manager");
+const { iconFor } = require("./icons");
 
 const HOST = "127.0.0.1";
 const PORT = Number(process.env.PORT) || 3000;
@@ -255,7 +256,14 @@ const routes = {
 
   "POST /api/list": async () => {
     requireUnlocked();
-    return { domains: [...domains].sort() };
+    const items = [...domains].sort().map((domain) => ({ domain, icon: iconFor(domain) }));
+    return { items };
+  },
+
+  "POST /api/icon": async (body) => {
+    requireUnlocked();
+    const domain = typeof body.domain === "string" ? body.domain.slice(0, 64) : "";
+    return { icon: domain.trim() ? iconFor(domain.trim()) : null };
   },
 
   "POST /api/lock": async () => {
@@ -289,7 +297,7 @@ const routes = {
     // Entries saved before the index existed get added the first time
     // they're looked up.
     if (password !== null && await indexAdd(domain)) await saveVault();
-    return { domain, password };
+    return { domain, password, icon: iconFor(domain) };
   },
 
   "POST /api/remove": async (body) => {
